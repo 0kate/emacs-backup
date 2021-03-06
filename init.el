@@ -20,6 +20,7 @@
 (tool-bar-mode -1)
 (setq make-backup-files nil)
 (setq auto-save-default nil)
+(setq create-lockfiles nil)
 
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
@@ -133,11 +134,11 @@
 (use-package lsp-ui
   :ensure t)
 
-;; indent-guide
-(use-package indent-guide
+;; highlight-indent-guides
+(use-package highlight-indent-guides
   :ensure t
   :config
-  (indent-guide-global-mode))
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
@@ -153,4 +154,29 @@
 
 ;; markdown-preview-mode
 (use-package markdown-preview-mode
+  :ensure t
+  :config
+  (setq markdown-preview-stylesheets (list "github.css")))
+
+(use-package docker
   :ensure t)
+
+(use-package exec-path-from-shell
+  :ensure t)
+
+(use-package web-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.js[x]?$" . web-mode))
+  (setq web-mode-content-types-alist
+	'(("jsx" . "\\.js[x]?\\'")))
+  (add-hook 'web-mode-hook
+          '(lambda ()
+             (setq web-mode-attr-indent-offset nil)
+             (setq web-mode-markup-indent-offset 2)
+             (setq web-mode-css-indent-offset 2)
+             (setq web-mode-code-indent-offset 2)
+             (setq web-mode-sql-indent-offset 2)
+             (setq indent-tabs-mode nil)
+             (setq tab-width 2)
+          )))
