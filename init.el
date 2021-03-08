@@ -22,6 +22,7 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
+(setq indent-tab-mode nil)
 
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
