@@ -2,6 +2,7 @@
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "http://stable-melpa.org/packages/") t)
 (package-initialize)
 
 ;; initialize use-packge
@@ -171,4 +172,23 @@
              (setq web-mode-sql-indent-offset 2)
              (setq indent-tabs-mode nil)
              (setq tab-width 2)
-          )))
+	     )))
+
+(use-package lsp-mode
+  :ensure t
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook
+  ((c-mode . lsp)
+   (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; lsp-ui
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+;; lsp-ivy
+(use-package lsp-ivy
+  :ensure t
+  :commands lsp-ivy-workspace-symbol)
