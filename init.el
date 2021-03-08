@@ -126,14 +126,6 @@
   :config
   (doom-modeline-mode 1))
 
-;; lsp-mode
-(use-package lsp-mode
-  :ensure t)
-
-;; lsp-ui
-(use-package lsp-ui
-  :ensure t)
-
 ;; highlight-indent-guides
 (use-package highlight-indent-guides
   :ensure t
