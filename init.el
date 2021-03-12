@@ -9,12 +9,13 @@
 (if (not (package-installed-p 'use-package))
     (progn
       (package-refresh-contents)
-      (package-install 'use-package)))
+      (package-instanll 'use-package)))
 
-;; linum
-(global-linum-mode 1)
-(add-hook 'eshell-mode-hook (lambda () (linum-mode -1)))
-(add-hook 'shell-mode-hook (lambda () (linum-mode -1)))
+;; display-line-numbers-mode
+(global-display-line-numbers-mode)
+(add-hook 'eshell-mode-hook ())
+(add-hook 'shell-mode-hook ())
+(add-hook 'dashboard-mode-hook ())
 
 ;; disable
 (menu-bar-mode -1)
@@ -30,6 +31,19 @@
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
+
+;; exec-path-from-path
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (exec-path-from-shell-initialize))
+
+;; rbenv
+(setenv "RBENV_ROOT" "~/.anyenv/envs/rbenv")
+(use-package rbenv
+  :ensure t
+  :config
+  (global-rbenv-mode))
 
 ;; ivy
 (use-package ivy
@@ -69,6 +83,12 @@
 ;; magit
 (use-package magit
   :ensure t)
+
+;; git-gutter
+(use-package git-gutter
+  :ensure t
+  :config
+  (global-git-gutter-mode t))
 
 ;; monokai-theme
 (use-package monokai-theme
@@ -181,6 +201,8 @@
   (setq lsp-keymap-prefix "C-c l")
   :hook
   ((c-mode . lsp)
+   (python-mode . lsp)
+   (ruby-mode . lsp)
    (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
 
