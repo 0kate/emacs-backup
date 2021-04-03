@@ -31,6 +31,7 @@
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
+(global-set-key (kbd "C-;") 'toggle-input-method)
 
 ;; exec-path-from-path
 (use-package exec-path-from-shell
@@ -215,3 +216,48 @@
 (use-package lsp-ivy
   :ensure t
   :commands lsp-ivy-workspace-symbol)
+
+;; emacs-mozc
+(add-to-list 'load-path "/usr/share/emacs24/site-lisp/emacs-mozc")
+(use-package mozc
+  :ensure t
+  :config
+  (setq default-input-method "japanese-mozc"))
+
+(defun test-while ()
+  (interactive)
+  (setq str (read-string "input >>"))
+  (setq i 0)
+  (setq array (list "a" "b"))
+  (push "c" array)
+  (message (mapconcat 'identity array ","))
+  (while (< i (length str))
+    (setq i (1+ i))))
+
+(defun chunking-str (str chunk-len)
+  (let (i 0) (chunks '())
+       (while (< i (length str))
+	 (push chunks (substring str i (+ chunk-len i)))
+	 (let i (+ i chunk-len)))
+  (chunks)))
+
+(defun test-chunking-str ()
+  (interactive)
+  (setq str (read-string "str >> "))
+  (setq chunks (chunking-str str 2))
+  (message (mapconcat 'identity chunks ",")))
+
+;; fsa-payload-generator
+(defun fsa-payload-generator ()
+  (interactive)
+  (let target-addr (read-string "Target address >> "))
+  (let venom-addr (read-string "Venom address >> "))
+  (let bytes '())
+  (let i 0)
+  (while (< i (length target-addr))
+    (when (eq (% i 2) 0)
+	(progn
+	  (let byte (substring target-addr i (+ 2 i)))
+	  (push byte bytes)))
+    (setq i (1+ i)))
+  (message (mapconcat 'identity bytes "")))
