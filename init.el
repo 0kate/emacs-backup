@@ -25,13 +25,15 @@
 (setq create-lockfiles nil)
 (setq indent-tab-mode nil)
 
+;; line spacing
+(set-default 'line-spacing 5)
+
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
 
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
-(global-set-key (kbd "C-;") 'toggle-input-method)
 
 ;; exec-path-from-path
 (use-package exec-path-from-shell
@@ -217,12 +219,30 @@
   :ensure t
   :commands lsp-ivy-workspace-symbol)
 
-;; emacs-mozc
+;; mozc
 (add-to-list 'load-path "/usr/share/emacs24/site-lisp/emacs-mozc")
 (use-package mozc
   :ensure t
   :config
   (setq default-input-method "japanese-mozc"))
+
+;; mozc-popup
+(use-package mozc-popup
+  :ensure t)
+
+;; mew
+(use-package mew
+  :ensure t
+  :config
+  (setq mew-mail-domain "me.com")
+  (setq mew-proto "%")
+  (setq mew-imap-server "imap.mail.me.com")
+  (setq mew-imap-ssl-port "993")
+  (setq mew-imap-user "o.keito317@icloud.com")
+  (setq mew-imap-auth t)
+  (setq mew-imap-ssl t)
+  )
+
 
 (defun test-while ()
   (interactive)
