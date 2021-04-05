@@ -26,7 +26,7 @@
 (setq indent-tab-mode nil)
 
 ;; line spacing
-(set-default 'line-spacing 5)
+(set-default 'line-spacing 3)
 
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
