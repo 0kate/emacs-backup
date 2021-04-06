@@ -240,9 +240,7 @@
   (setq mew-imap-ssl-port "993")
   (setq mew-imap-user "o.keito317@icloud.com")
   (setq mew-imap-auth t)
-  (setq mew-imap-ssl t)
-  )
-
+  (setq mew-imap-ssl t))
 
 (defun test-while ()
   (interactive)
