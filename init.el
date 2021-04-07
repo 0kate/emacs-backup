@@ -28,6 +28,9 @@
 ;; line spacing
 (set-default 'line-spacing 3)
 
+;; scroll
+(setq scroll-conservatively 1)
+
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
 
@@ -198,10 +201,19 @@
              (setq tab-width 2)
 	     )))
 
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode t)
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-p") 'company-select-previous))
+
 (use-package lsp-mode
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")
+  :config
+  (setq lsp-completion-provider :capf)
   :hook
   ((c-mode . lsp)
    (python-mode . lsp)
