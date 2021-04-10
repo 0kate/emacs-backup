@@ -164,7 +164,7 @@
 (use-package rainbow-delimiters
   :ensure t
   :config
-  (rainbow-delimiters-mode 1))
+  (rainbow-delimiters-mode t))
 
 ;; paren
 (use-package paren
@@ -206,15 +206,17 @@
   :config
   (global-company-mode t)
   (setq company-idle-delay 0)
+  (push 'company-lsp company-backends)
   (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous))
 
+;; lsp-mode
 (use-package lsp-mode
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")
-  :config
   (setq lsp-completion-provider :capf)
+  (setq lsp-pyls-server-command '("${HOME}/.anyenv/envs/pyenv/shims/pyls"))
   :hook
   ((c-mode . lsp)
    (python-mode . lsp)
@@ -231,6 +233,14 @@
 (use-package lsp-ivy
   :ensure t
   :commands lsp-ivy-workspace-symbol)
+
+;; lsp-pyright
+(use-package lsp-pyright
+  :ensure t
+  :hook
+  (python-mode . (lambda ()
+		   (require 'lsp-pyright)
+		   (lsp))))
 
 ;; mozc
 (add-to-list 'load-path "/usr/share/emacs24/site-lisp/emacs-mozc")
