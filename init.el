@@ -12,9 +12,12 @@
       (package-instanll 'use-package)))
 
 ;; display-line-numbers-mode
-(global-display-line-numbers-mode)
+(display-line-numbers-mode t)
 (add-hook 'eshell-mode-hook ())
-(add-hook 'shell-mode-hook ())
+(add-hook 'shell-mode-hook (lambda ()
+			     (display-line-numbers-mode nil)
+			     (define-key shell-mode-map (kbd "C-p") 'comint-previous-input)
+			     (define-key shell-mode-map (kbd "C-n") 'comint-next-input)))
 (add-hook 'dashboard-mode-hook ())
 
 ;; disable
@@ -83,12 +86,13 @@
 (use-package avy
   :ensure t
   :bind
-  ("M-g l" . avy-goto-line)
-  ("M-g w" . avy-goto-word-1))
+  ("C-0" . avy-goto-word-0))
 
 ;; magit
 (use-package magit
-  :ensure t)
+  :ensure t
+  :bind
+  ("C-9" . magit-status))
 
 ;; git-gutter
 (use-package git-gutter
