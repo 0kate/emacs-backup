@@ -56,11 +56,16 @@
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
 
+;; tab width
+(add-hook 'json-mode-hook (lambda ()
+			    (setq js-indent-level 2)))
+
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
 (global-set-key (kbd "C-{") 'shrink-window-horizontally)
 (global-set-key (kbd "C-}") 'enlarge-window-horizontally)
+
 ;; exec-path-from-path
 (use-package exec-path-from-shell
   :ensure t
@@ -214,7 +219,7 @@
 		(setq web-mode-sql-indent-offset 2)
 		(setq indent-tabs-mode nil)
 		(setq tab-width 2))))
-n
+
 (use-package company
   :ensure t
   :config
