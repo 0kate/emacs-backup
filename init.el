@@ -11,14 +11,33 @@
       (package-refresh-contents)
       (package-instanll 'use-package)))
 
+;; anyenv shims
+(defun append-anyenv-path (env)
+  (let ((path (concat (getenv "HOME") "/.anyenv/envs/" env)))
+    (setq bin-path (concat path "/bin"))
+    (setq shims-path (concat path "/shims"))
+    (setenv "PATH" (concat bin-path path-separator (getenv "PATH")))
+    (setenv "PATH" (concat shims-path path-separator (getenv "PATH")))))
+(append-anyenv-path "denv")
+(append-anyenv-path "jenv")
+(append-anyenv-path "nodenv")
+(append-anyenv-path "pyenv")
+(append-anyenv-path "rbenv")
+
 ;; display-line-numbers-mode
-(display-line-numbers-mode t)
-(add-hook 'eshell-mode-hook ())
+(add-hook 'eshell-mode-hook (lambda ()
+			     (display-line-numbers-mode -1)
+			     (define-key eshell-mode-map (kbd "C-p") 'eshell-previous-input)
+			     (define-key eshell-mode-map (kbd "C-n") 'eshell-next-input)))
 (add-hook 'shell-mode-hook (lambda ()
-			     (display-line-numbers-mode nil)
+			     (display-line-numbers-mode -1)
 			     (define-key shell-mode-map (kbd "C-p") 'comint-previous-input)
-			     (define-key shell-mode-map (kbd "C-n") 'comint-next-input)))
-(add-hook 'dashboard-mode-hook ())
+			     (define-key shell-mode-map (kbd "C-n") 'comint-next-input)
+			     (define-key shell-mode-map (kbd "C-l") 'comint-clear-buffer)))
+(add-hook 'dashboard-mode-hook (lambda ()
+				 (display-line-numbers-mode -1)))
+(add-hook 'prog-mode-hook (lambda ()
+			    (display-line-numbers-mode t)))
 
 ;; disable
 (menu-bar-mode -1)
@@ -40,19 +59,13 @@
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
-
+(global-set-key (kbd "C-{") 'shrink-window-horizontally)
+(global-set-key (kbd "C-}") 'enlarge-window-horizontally)
 ;; exec-path-from-path
 (use-package exec-path-from-shell
   :ensure t
   :config
   (exec-path-from-shell-initialize))
-
-;; rbenv
-(setenv "RBENV_ROOT" "~/.anyenv/envs/rbenv")
-(use-package rbenv
-  :ensure t
-  :config
-  (global-rbenv-mode))
 
 ;; ivy
 (use-package ivy
@@ -167,8 +180,9 @@
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
   :ensure t
-  :config
-  (rainbow-delimiters-mode t))
+  :init
+  (progn
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)))
 
 ;; paren
 (use-package paren
@@ -185,26 +199,22 @@
 (use-package docker
   :ensure t)
 
-(use-package exec-path-from-shell
-  :ensure t)
-
 (use-package web-mode
   :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.js[x]?$" . web-mode))
   (setq web-mode-content-types-alist
 	'(("jsx" . "\\.js[x]?\\'")))
-  (add-hook 'web-mode-hook
-          '(lambda ()
-             (setq web-mode-attr-indent-offset nil)
-             (setq web-mode-markup-indent-offset 2)
-             (setq web-mode-css-indent-offset 2)
-             (setq web-mode-code-indent-offset 2)
-             (setq web-mode-sql-indent-offset 2)
-             (setq indent-tabs-mode nil)
-             (setq tab-width 2)
-	     )))
-
+  :hook
+  (web-mode . (lambda ()
+		(setq web-mode-attr-indent-offset nil)
+		(setq web-mode-markup-indent-offset 2)
+		(setq web-mode-css-indent-offset 2)
+		(setq web-mode-code-indent-offset 2)
+		(setq web-mode-sql-indent-offset 2)
+		(setq indent-tabs-mode nil)
+		(setq tab-width 2))))
+n
 (use-package company
   :ensure t
   :config
@@ -220,18 +230,18 @@
   :init
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-completion-provider :capf)
-  (setq lsp-pyls-server-command '("${HOME}/.anyenv/envs/pyenv/shims/pyls"))
   :hook
   ((c-mode . lsp)
    (python-mode . lsp)
-   (ruby-mode . lsp)
    (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
 
 ;; lsp-ui
 (use-package lsp-ui
   :ensure t
-  :commands lsp-ui-mode)
+  :commands lsp-ui-mode
+  :hook
+  (lsp-ui-mode . (lsp-ui-mode t)))
 
 ;; lsp-ivy
 (use-package lsp-ivy
@@ -241,10 +251,9 @@
 ;; lsp-pyright
 (use-package lsp-pyright
   :ensure t
-  :hook
-  (python-mode . (lambda ()
-		   (require 'lsp-pyright)
-		   (lsp))))
+    :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
 
 ;; mozc
 (add-to-list 'load-path "/usr/share/emacs24/site-lisp/emacs-mozc")
@@ -269,40 +278,11 @@
   (setq mew-imap-auth t)
   (setq mew-imap-ssl t))
 
-(defun test-while ()
-  (interactive)
-  (setq str (read-string "input >>"))
-  (setq i 0)
-  (setq array (list "a" "b"))
-  (push "c" array)
-  (message (mapconcat 'identity array ","))
-  (while (< i (length str))
-    (setq i (1+ i))))
+(use-package whitespace
+  :ensure t)
 
-(defun chunking-str (str chunk-len)
-  (let (i 0) (chunks '())
-       (while (< i (length str))
-	 (push chunks (substring str i (+ chunk-len i)))
-	 (let i (+ i chunk-len)))
-  (chunks)))
+(use-package clojure-mode
+  :ensure t)
 
-(defun test-chunking-str ()
-  (interactive)
-  (setq str (read-string "str >> "))
-  (setq chunks (chunking-str str 2))
-  (message (mapconcat 'identity chunks ",")))
-
-;; fsa-payload-generator
-(defun fsa-payload-generator ()
-  (interactive)
-  (let target-addr (read-string "Target address >> "))
-  (let venom-addr (read-string "Venom address >> "))
-  (let bytes '())
-  (let i 0)
-  (while (< i (length target-addr))
-    (when (eq (% i 2) 0)
-	(progn
-	  (let byte (substring target-addr i (+ 2 i)))
-	  (push byte bytes)))
-    (setq i (1+ i)))
-  (message (mapconcat 'identity bytes "")))
+(use-package yaml-mode
+  :ensure t)
