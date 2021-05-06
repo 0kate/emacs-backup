@@ -291,3 +291,11 @@
 
 (use-package yaml-mode
   :ensure t)
+
+;; beacon
+(use-package beacon
+  :ensure t
+  :custom
+  (beacon-color "yellow")
+  :config
+  (beacon-mode 1))
