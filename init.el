@@ -208,8 +208,7 @@
   :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.js[x]?$" . web-mode))
-  (setq web-mode-content-types-alist
-	'(("jsx" . "\\.js[x]?\\'")))
+  (add-to-list 'auto-mode-alist '("\\.ts[x]?$" . web-mode))
   :hook
   (web-mode . (lambda ()
 		(setq web-mode-attr-indent-offset nil)
@@ -219,6 +218,21 @@
 		(setq web-mode-sql-indent-offset 2)
 		(setq indent-tabs-mode nil)
 		(setq tab-width 2))))
+
+(use-package tide
+  :ensure t
+  :hook
+  (web-mode . (lambda ()
+		(interactive)
+		(tide-setup)
+		(flycheck-mode +1)
+		(setq flycheck-check-syntax-automatically '(save mode-enabled))
+		(eldoc-mode +1)
+		(tide-hl-identifier-mode +1)
+		;; company is an optional dependency. You have to
+		;; install it separately via package-install
+		;; `M-x package-install [ret] company`
+		(company-mode +1))))
 
 (use-package company
   :ensure t
