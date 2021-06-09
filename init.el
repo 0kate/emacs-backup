@@ -243,6 +243,10 @@
   (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous))
 
+;; go-mode
+(use-package go-mode
+  :ensure t)
+
 ;; lsp-mode
 (use-package lsp-mode
   :ensure t
