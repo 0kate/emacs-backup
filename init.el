@@ -63,8 +63,8 @@
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
-(global-set-key (kbd "C-{") 'shrink-window-horizontally)
-(global-set-key (kbd "C-}") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-S-[") 'shrink-window-horizontally)
+(global-set-key (kbd "C-S-]") 'enlarge-window-horizontally)
 
 ;; exec-path-from-path
 (use-package exec-path-from-shell
@@ -129,6 +129,7 @@
   :ensure t
   :config
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+  (setq neo-window-fixed-size nil)
   :bind
   ("C-t" . neotree-toggle)
   ("C-S-h" . neotree-hidden-file-toggle))
