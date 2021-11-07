@@ -26,22 +26,27 @@
 
 ;; display-line-numbers-mode
 (add-hook 'eshell-mode-hook (lambda ()
-			     (display-line-numbers-mode -1)
-			     (define-key eshell-mode-map (kbd "C-p") 'eshell-previous-input)
-			     (define-key eshell-mode-map (kbd "C-n") 'eshell-next-input)))
+			                        (display-line-numbers-mode -1)
+			                        (define-key eshell-mode-map (kbd "C-p") 'eshell-previous-input)
+			                        (define-key eshell-mode-map (kbd "C-n") 'eshell-next-input)))
 (add-hook 'shell-mode-hook (lambda ()
-			     (display-line-numbers-mode -1)
-			     (define-key shell-mode-map (kbd "C-p") 'comint-previous-input)
-			     (define-key shell-mode-map (kbd "C-n") 'comint-next-input)
-			     (define-key shell-mode-map (kbd "C-l") 'comint-clear-buffer)))
+			                       (display-line-numbers-mode -1)
+			                       (define-key shell-mode-map (kbd "C-p") 'comint-previous-input)
+			                       (define-key shell-mode-map (kbd "C-n") 'comint-next-input)
+			                       (define-key shell-mode-map (kbd "C-l") 'comint-clear-buffer)))
 (add-hook 'dashboard-mode-hook (lambda ()
-				 (display-line-numbers-mode -1)))
+				                         (display-line-numbers-mode -1)))
+(add-hook 'json-mode-hook (lambda ()
+			                      (setq js-indent-level 2)))
 (add-hook 'prog-mode-hook (lambda ()
-			    (display-line-numbers-mode t)))
+			                      (display-line-numbers-mode t)))
+(add-hook 'text-mode-hook (lambda ()
+			                      (display-line-numbers-mode t)))
 
 ;; disable
 (menu-bar-mode -1)
 (tool-bar-mode -1)
+(setq mode-line-percent-position nil)
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
@@ -56,15 +61,20 @@
 ;; custom variable
 (setq custom-file (concat user-emacs-directory "/custom.el"))
 
-;; tab width
-(add-hook 'json-mode-hook (lambda ()
-			    (setq js-indent-level 2)))
-
 ;; global keybinds
 (global-set-key (kbd "<f5>") 'eval-buffer)
 (global-set-key (kbd "C-h") 'delete-backward-char)
-(global-set-key (kbd "C-S-[") 'shrink-window-horizontally)
-(global-set-key (kbd "C-S-]") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-M-[") 'shrink-window-horizontally)
+(global-set-key (kbd "C-]") 'enlarge-window-horizontally)
+(global-set-key (kbd "C--") 'text-scale-decrease)
+(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "C-x p") (lambda ()
+				                        (interactive)
+				                        (other-window -1)))
+(global-set-key (kbd "C-x SPC") 'rectangle-mark-mode)
+
+;; electric-pair
+(electric-pair-mode 1)
 
 ;; exec-path-from-path
 (use-package exec-path-from-shell
@@ -96,10 +106,6 @@
 (use-package all-the-icons
   :ensure t)
 
-;; org
-(use-package org
-  :ensure t)
-
 ;; avy
 (use-package avy
   :ensure t
@@ -116,7 +122,13 @@
 (use-package git-gutter
   :ensure t
   :config
-  (global-git-gutter-mode t))
+  (global-git-gutter-mode t)
+  :custom
+  (git-gutter:modified-sign "~")
+  :custom-face
+  (git-gutter:added ((t (:inherit fringe :background "green4" :foreground "green1"))))
+  (git-gutter:deleted ((t (:inherit fringe :background "brown4" :foreground "brown1"))))
+  (git-gutter:modified ((t (:inherit fringe :background "turquoise4" :foreground "turquoise1")))))
 
 ;; monokai-theme
 (use-package monokai-theme
@@ -139,14 +151,15 @@
   :ensure t
   :demand
   :config
-  (centaur-tabs-mode t)
   (centaur-tabs-headline-match)
-  (setq centaur-tabs-style "bar")
-  (setq centaur-tabs-set-bar 'left)
-  (setq centaur-tabs-set-icons t)
-  (setq centaur-tabs-gray-out-icons 'buffer)
-  (setq centaur-tabs-set-modified-marker t)
-  (setq centaur-tabs-modified-marker "◉")
+  (centaur-tabs-mode t)
+  :custom
+  (centaur-tabs-style "wave")
+  (centaur-tabs-height 30)
+  (centaur-tabs-set-icons t)
+  (centaur-tabs-gray-out-icons 'buffer)
+  (centaur-tabs-set-modified-marker t)
+  (centaur-tabs-modified-marker "◉")
   :bind
   ("<C-iso-lefttab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward))
@@ -157,7 +170,10 @@
   :diminish
   (dashboard-mode page-break-lines-mode)
   :config
-  (dashboard-setup-startup-hook))
+  (dashboard-setup-startup-hook)
+  (setq dashboard-items '((recents . 5)
+			                    (bookmarks . 5)
+			                    (projects . 5))))
 
 ;; doom-themes
 (use-package doom-themes
@@ -181,14 +197,14 @@
 (use-package highlight-indent-guides
   :ensure t
   :config
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  (add-hook 'nxml-mode-hook 'highlight-indent-guides-mode))
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
   :ensure t
   :init
-  (progn
-    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)))
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 ;; paren
 (use-package paren
@@ -200,7 +216,7 @@
 (use-package markdown-preview-mode
   :ensure t
   :config
-  (setq markdown-preview-stylesheets (list "github.css")))
+  (setq markdown-preview-stylesheets '("github.css")))
 
 (use-package docker
   :ensure t)
@@ -210,30 +226,30 @@
   :config
   (add-to-list 'auto-mode-alist '("\\.js[x]?$" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.ts[x]?$" . web-mode))
-  :hook
-  (web-mode . (lambda ()
-		(setq web-mode-attr-indent-offset nil)
-		(setq web-mode-markup-indent-offset 2)
-		(setq web-mode-css-indent-offset 2)
-		(setq web-mode-code-indent-offset 2)
-		(setq web-mode-sql-indent-offset 2)
-		(setq indent-tabs-mode nil)
-		(setq tab-width 2))))
+  (add-to-list 'auto-mode-alist '("\\.vue?$" . web-mode))
+  (setq indent-tabs-mode nil)
+  (setq tab-width 2)
+  :custom
+  (web-mode-auto-close-style 2)
+  (web-mode-markup-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-script-padding 0))
 
 (use-package tide
   :ensure t
   :hook
   (web-mode . (lambda ()
-		(interactive)
-		(tide-setup)
-		(flycheck-mode +1)
-		(setq flycheck-check-syntax-automatically '(save mode-enabled))
-		(eldoc-mode +1)
-		(tide-hl-identifier-mode +1)
-		;; company is an optional dependency. You have to
-		;; install it separately via package-install
-		;; `M-x package-install [ret] company`
-		(company-mode +1))))
+		            (interactive)
+		            (tide-setup)
+		            (flycheck-mode +1)
+		            (setq flycheck-check-syntax-automatically '(save mode-enabled))
+		            (eldoc-mode +1)
+		            (tide-hl-identifier-mode +1)
+		            ;; company is an optional dependency. You have to
+		            ;; install it separately via package-install
+		            ;; `M-x package-install [ret] company`
+		            (company-mode +1))))
 
 (use-package company
   :ensure t
@@ -251,21 +267,63 @@
 ;; lsp-mode
 (use-package lsp-mode
   :ensure t
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  (setq lsp-completion-provider :capf)
   :hook
-  ((c-mode . lsp)
+  ((sh-mode . lsp)
+   (c-mode . lsp)
+   (c++-mode . lsp)
+   (dockerfile-mode . lsp)
+   (java-mode . lsp)
+   (json-mode . lsp)
+   (nxml-mode . lsp)
    (python-mode . lsp)
+   (rust-mode . lsp)
+   (web-mode . lsp)
+   ;; key integration
    (lsp-mode . lsp-enable-which-key-integration))
+  :custom
+  (lsp-keymap-prefix "C-c l")
+  (lsp-prefer-capf t)
+  (lsp-rust-server 'rust-analyzer)
   :commands lsp)
 
 ;; lsp-ui
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode
+  :after lsp-mode
+  :custom
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-header t)
+  (lsp-ui-doc-include-signature t)
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-max-width  60)
+  (lsp-ui-doc-max-height 20)
+  (lsp-ui-doc-use-childframe t)
+  (lsp-ui-doc-use-webkit nil)
+
+  ;; lsp-ui-flycheck
+  (lsp-ui-flycheck-enable t)
+
+  ;; lsp-ui-sideline
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-sideline-show-symbol t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-code-actions nil)
+
+  ;; lsp-ui-imenu
+  (lsp-ui-imenu-enable t)
+  (lsp-ui-imenu-kind-position 'top)
+
+  ;; lsp-ui-peek
+  (lsp-ui-peek-enable t)
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-peek-peek-height 30)
+  (lsp-ui-peek-list-width 30)
+  (lsp-ui-peek-fontify 'always)
   :hook
-  (lsp-ui-mode . (lsp-ui-mode t)))
+  (lsp-mode . lsp-ui-mode))
 
 ;; lsp-ivy
 (use-package lsp-ivy
@@ -274,10 +332,25 @@
 
 ;; lsp-pyright
 (use-package lsp-pyright
+  :ensure t)
+
+;; lsp-java
+(use-package lsp-java
+  :ensure t)
+
+;; ccls
+(use-package ccls
   :ensure t
-    :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+  :config
+  (setq ccls-executable "/usr/bin/ccls"))
+
+;; which-key
+(use-package which-key
+  :ensure t)
+
+;; yasnippet
+(use-package yasnippet
+  :ensure t)
 
 ;; mozc
 (add-to-list 'load-path "/usr/share/emacs24/site-lisp/emacs-mozc")
@@ -290,20 +363,17 @@
 (use-package mozc-popup
   :ensure t)
 
-;; mew
-(use-package mew
+(use-package whitespace
   :ensure t
   :config
-  (setq mew-mail-domain "me.com")
-  (setq mew-proto "%")
-  (setq mew-imap-server "imap.mail.me.com")
-  (setq mew-imap-ssl-port "993")
-  (setq mew-imap-user "o.keito317@icloud.com")
-  (setq mew-imap-auth t)
-  (setq mew-imap-ssl t))
-
-(use-package whitespace
-  :ensure t)
+  (global-whitespace-mode t)
+  (setq whitespace-style '(face
+			                     trailing
+			                     tabs
+			                     empty
+			                     spaces
+			                     tab-mark))
+  (setq whitespace-space-regexp "\\(\u3000+\\)"))
 
 (use-package clojure-mode
   :ensure t)
@@ -318,3 +388,36 @@
   (beacon-color "yellow")
   :config
   (beacon-mode 1))
+
+;; rust-mode
+(use-package rust-mode
+  :ensure t)
+
+;; terraform-mode
+(use-package terraform-mode
+  :ensure t)
+
+;; projectile
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode +1))
+
+;; minimap
+(use-package minimap
+  :ensure t
+  :config
+  (minimap-mode 1)
+  :custom
+  (minimap-major-modes '(prog-mode
+			                   markdown-mode
+			                   nxml-mode))
+  (minimap-window-location 'right)
+  (minimap-update-delay 0.2)
+  (minimap-minimum-width 1)
+  :bind
+  ("C-x m" . 'minimap-mode))
+
+;; csv-mode
+(use-package csv-mode
+  :ensure t)
