@@ -3,6 +3,8 @@
 (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives '("melpa-stable" . "http://stable-melpa.org/packages/") t)
+(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'load-path "~/.local/share/icons-in-terminal/")
 (package-initialize)
 
 ;; initialize use-packge
@@ -11,37 +13,66 @@
       (package-refresh-contents)
       (package-instanll 'use-package)))
 
+(defun append-to-path (new-path)
+  (setenv "PATH" (concat new-path path-separator (getenv "PATH"))))
+
 ;; anyenv shims
 (defun append-anyenv-path (env)
   (let ((path (concat (getenv "HOME") "/.anyenv/envs/" env)))
     (setq bin-path (concat path "/bin"))
     (setq shims-path (concat path "/shims"))
-    (setenv "PATH" (concat bin-path path-separator (getenv "PATH")))
-    (setenv "PATH" (concat shims-path path-separator (getenv "PATH")))))
+    (append-to-path bin-path)
+    (append-to-path shims-path)))
 (append-anyenv-path "denv")
 (append-anyenv-path "jenv")
 (append-anyenv-path "nodenv")
 (append-anyenv-path "pyenv")
 (append-anyenv-path "rbenv")
 
+(append-to-path (concat (getenv "HOME") "/.local/waf-2.0.22"))
+
+(defun eshell-run (cmd)
+  "RUns the command 'cmd' in eshell."
+  (with-current-buffer "*eshell*"
+    (end-of-buffer)
+    (eshell-kill-input)
+    (message (concat "Running in Eshell: " cmd))
+    (insert cmd)
+    (eshell-send-input)
+    (eshell-bol)
+    (yank)))
+
 ;; display-line-numbers-mode
-(add-hook 'eshell-mode-hook (lambda ()
-			                        (display-line-numbers-mode -1)
-			                        (define-key eshell-mode-map (kbd "C-p") 'eshell-previous-input)
-			                        (define-key eshell-mode-map (kbd "C-n") 'eshell-next-input)))
-(add-hook 'shell-mode-hook (lambda ()
-			                       (display-line-numbers-mode -1)
-			                       (define-key shell-mode-map (kbd "C-p") 'comint-previous-input)
-			                       (define-key shell-mode-map (kbd "C-n") 'comint-next-input)
-			                       (define-key shell-mode-map (kbd "C-l") 'comint-clear-buffer)))
-(add-hook 'dashboard-mode-hook (lambda ()
-				                         (display-line-numbers-mode -1)))
-(add-hook 'json-mode-hook (lambda ()
-			                      (setq js-indent-level 2)))
-(add-hook 'prog-mode-hook (lambda ()
-			                      (display-line-numbers-mode t)))
-(add-hook 'text-mode-hook (lambda ()
-			                      (display-line-numbers-mode t)))
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (display-line-numbers-mode -1)
+            (define-key eshell-mode-map (kbd "M-p") 'eshell-previous-input)
+            (define-key eshell-mode-map (kbd "M-n") 'eshell-next-input)
+            (define-key eshell-mode-map (kbd "C-l") (lambda ()
+                                                      (interactive)
+                                                      (eshell-run "clear 1")))))
+(add-hook 'shell-mode-hook
+          (lambda ()
+            (display-line-numbers-mode -1)
+            (define-key shell-mode-map (kbd "C-p") 'comint-previous-input)
+            (define-key shell-mode-map (kbd "C-n") 'comint-next-input)
+            (define-key shell-mode-map (kbd "C-l") 'comint-clear-buffer)))
+(add-hook 'dashboard-mode-hook
+          (lambda ()
+            (display-line-numbers-mode -1)))
+(add-hook 'json-mode-hook
+          (lambda ()
+            (setq js-indent-level 2)))
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (display-line-numbers-mode t)))
+(add-hook 'text-mode-hook
+          (lambda ()
+            (display-line-numbers-mode t)))
+(add-hook 'c-mode-hook
+          (lambda ()
+            (setq c-basic-offset 4)
+            (setq tab-width 2)))
 
 ;; disable
 (menu-bar-mode -1)
@@ -50,7 +81,14 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
-(setq indent-tab-mode nil)
+(setq initial-scratch-message "")
+
+;; tabs
+(custom-set-variables '(tab-width 4))
+(setq-default indent-tabs-mode nil)
+
+;; font size
+(set-face-attribute 'default nil :height 115)
 
 ;; line spacing
 (set-default 'line-spacing 3)
@@ -69,12 +107,16 @@
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C-x p") (lambda ()
-				                        (interactive)
-				                        (other-window -1)))
+                                (interactive)
+                                (other-window -1)))
 (global-set-key (kbd "C-x SPC") 'rectangle-mark-mode)
 
 ;; electric-pair
 (electric-pair-mode 1)
+
+(setenv "PATH" (concat "$HOME/go/1.17.3/bin" ":"
+                       "$HOME/.anyenv/envs/goenv/versions/1.17.3/bin" ":"
+                       (getenv "PATH")))
 
 ;; exec-path-from-path
 (use-package exec-path-from-shell
@@ -172,8 +214,8 @@
   :config
   (dashboard-setup-startup-hook)
   (setq dashboard-items '((recents . 5)
-			                    (bookmarks . 5)
-			                    (projects . 5))))
+                          (bookmarks . 5)
+                          (projects . 5))))
 
 ;; doom-themes
 (use-package doom-themes
@@ -236,21 +278,6 @@
   (web-mode-css-indent-offset 2)
   (web-mode-script-padding 0))
 
-(use-package tide
-  :ensure t
-  :hook
-  (web-mode . (lambda ()
-		            (interactive)
-		            (tide-setup)
-		            (flycheck-mode +1)
-		            (setq flycheck-check-syntax-automatically '(save mode-enabled))
-		            (eldoc-mode +1)
-		            (tide-hl-identifier-mode +1)
-		            ;; company is an optional dependency. You have to
-		            ;; install it separately via package-install
-		            ;; `M-x package-install [ret] company`
-		            (company-mode +1))))
-
 (use-package company
   :ensure t
   :config
@@ -262,7 +289,14 @@
 
 ;; go-mode
 (use-package go-mode
-  :ensure t)
+  :ensure t
+  :init
+  (add-hook 'go-mode-hook (lambda ()
+                            (add-hook 'before-save-hook #'lsp-format-buffer t t)
+                            (add-hook 'before-save-hook #'lsp-organize-imports t t)
+                            (setq indent-tabs-mode nil)
+                            (setq c-basic-offset 4)
+                            (setq tab-width 4))))
 
 ;; lsp-mode
 (use-package lsp-mode
@@ -272,10 +306,12 @@
    (c-mode . lsp)
    (c++-mode . lsp)
    (dockerfile-mode . lsp)
+   (go-mode . lsp-deferred)
    (java-mode . lsp)
    (json-mode . lsp)
    (nxml-mode . lsp)
    (python-mode . lsp)
+   (scala-mode . lsp)
    (rust-mode . lsp)
    (web-mode . lsp)
    ;; key integration
@@ -284,7 +320,7 @@
   (lsp-keymap-prefix "C-c l")
   (lsp-prefer-capf t)
   (lsp-rust-server 'rust-analyzer)
-  :commands lsp)
+  :commands (lsp lsp-deferred))
 
 ;; lsp-ui
 (use-package lsp-ui
@@ -305,12 +341,12 @@
   (lsp-ui-flycheck-enable t)
 
   ;; lsp-ui-sideline
-  (lsp-ui-sideline-enable t)
-  (lsp-ui-sideline-ignore-duplicate t)
-  (lsp-ui-sideline-show-symbol t)
-  (lsp-ui-sideline-show-hover t)
-  (lsp-ui-sideline-show-diagnostics t)
-  (lsp-ui-sideline-show-code-actions nil)
+  ;; (lsp-ui-sideline-enable t)
+  ;; (lsp-ui-sideline-ignore-duplicate t)
+  ;; (lsp-ui-sideline-show-symbol t)
+  ;; (lsp-ui-sideline-show-hover t)
+  ;; (lsp-ui-sideline-show-diagnostics t)
+  ;; (lsp-ui-sideline-show-code-actions nil)
 
   ;; lsp-ui-imenu
   (lsp-ui-imenu-enable t)
@@ -368,11 +404,11 @@
   :config
   (global-whitespace-mode t)
   (setq whitespace-style '(face
-			                     trailing
-			                     tabs
-			                     empty
-			                     spaces
-			                     tab-mark))
+                           trailing
+                           tabs
+                           empty
+                           spaces
+                           tab-mark))
   (setq whitespace-space-regexp "\\(\u3000+\\)"))
 
 (use-package clojure-mode
@@ -407,11 +443,11 @@
 (use-package minimap
   :ensure t
   :config
-  (minimap-mode 1)
+  (minimap-mode nil)
   :custom
   (minimap-major-modes '(prog-mode
-			                   markdown-mode
-			                   nxml-mode))
+                         markdown-mode
+                         nxml-mode))
   (minimap-window-location 'right)
   (minimap-update-delay 0.2)
   (minimap-minimum-width 1)
@@ -421,3 +457,25 @@
 ;; csv-mode
 (use-package csv-mode
   :ensure t)
+
+;; scala-mode
+(use-package scala-mode
+  :ensure t)
+
+;; sbt-mode
+(use-package sbt-mode
+  :ensure t)
+
+;; lsp-metals
+(use-package lsp-metals
+  :ensure t)
+
+;; evil
+(use-package evil
+  :ensure t)
+  ;; :config
+  ;; (evil-mode 1))
+
+;; icons-in-terminal
+;; (require 'icons-in-terminal)
+;; (insert (icons-in-terminal 'oct_flame))
